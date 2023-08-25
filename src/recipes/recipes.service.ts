@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Recipe } from './recipe.model';
 import { v4 as uuid } from 'uuid';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
@@ -47,11 +47,18 @@ export class RecipesService {
   }
 
   getRecipeById(id: string): Recipe {
-    return this.recipes.find((recipe) => recipe.id === id);
+    const found = this.recipes.find((recipe) => recipe.id === id);
+
+    if (!found) {
+      throw new NotFoundException(`Recipe with ID ${id} not found`);
+    }
+
+    return found;
   }
 
   deleteRecipe(id: string): void {
-    this.recipes = this.recipes.filter((recipe) => recipe.id !== id);
+    const found = this.getRecipeById(id);
+    this.recipes = this.recipes.filter((recipe) => recipe.id !== found.id);
   }
 
   updateRecipeCookedStatus(id: string, cooked: boolean): Recipe {

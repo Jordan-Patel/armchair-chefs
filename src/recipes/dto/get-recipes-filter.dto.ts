@@ -1,10 +1,13 @@
-// import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { RecipeDifficulty } from '../recipe.model';
 
 export class GetRecipesFilterDto {
-  //   @IsString()
-  //   @IsOptional()
+  @IsString()
+  @IsOptional()
   search?: string;
+
+  @IsOptional()
+  @IsEnum(RecipeDifficulty)
   difficulty?: RecipeDifficulty;
 }
