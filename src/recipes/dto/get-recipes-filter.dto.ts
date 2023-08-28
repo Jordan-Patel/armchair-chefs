@@ -1,6 +1,6 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
-import { RecipeDifficulty } from '../recipe.model';
+import { RecipeDifficulty } from '../recipe-difficulty.enum';
 
 export class GetRecipesFilterDto {
   @IsString()
@@ -8,6 +8,6 @@ export class GetRecipesFilterDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(RecipeDifficulty)
+  // @IsEnum(RecipeDifficulty)
   difficulty?: RecipeDifficulty;
 }

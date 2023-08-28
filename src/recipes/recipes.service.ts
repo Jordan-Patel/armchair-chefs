@@ -1,22 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Recipe } from './recipe.model';
-import { v4 as uuid } from 'uuid';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Recipe } from './recipe.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RecipesService {
-  private recipes: Recipe[] = [];
+  constructor(
+    @InjectRepository(Recipe)
+    private readonly recipeRepository: Repository<Recipe>,
+  ) {}
 
-  findAllRecipes(): Recipe[] {
-    return this.recipes;
+  findAllRecipes(): Promise<Recipe[]> {
+    return this.recipeRepository.find();
   }
 
-  createRecipe(createRecipeDto: CreateRecipeDto): Recipe {
+  async createRecipe(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
     const { title, description, ingredients, steps, cookingTime, difficulty } =
       createRecipeDto;
-    const recipe: Recipe = {
-      id: uuid(),
+    const recipe: Recipe = this.recipeRepository.create({
       title,
       description,
       ingredients,
@@ -26,29 +29,35 @@ export class RecipesService {
       cooked: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
-    this.recipes.push(recipe);
+    });
+
+    await this.recipeRepository.save(recipe);
     return recipe;
   }
 
-  getRecipesWithFilters(filterDto: GetRecipesFilterDto): Recipe[] {
+  async getRecipes(filterDto: GetRecipesFilterDto): Promise<Recipe[]> {
     const { difficulty, search } = filterDto;
-    let recipes = this.findAllRecipes();
-    if (difficulty) {
-      recipes = recipes.filter((recipe) => recipe.difficulty === difficulty);
-    }
+
+    const query = this.recipeRepository.createQueryBuilder('recipe');
+    query.where({ difficulty });
+
     if (search) {
-      recipes = recipes.filter(
-        (recipe) =>
-          recipe.title.includes(search) || recipe.description.includes(search),
+      query.andWhere(
+        'recipe.title LIKE :search OR recipe.description LIKE :search',
+        { search: `%${search}%` },
       );
     }
-    return recipes;
+
+    try {
+      const recipes = await query.getMany();
+      return recipes;
+    } catch (error) {
+      throw new NotFoundException('No recipes found');
+    }
   }
 
-  getRecipeById(id: string): Recipe {
-    const found = this.recipes.find((recipe) => recipe.id === id);
-
+  async getRecipeById(id: string): Promise<Recipe> {
+    const found = this.recipeRepository.findOneBy({ id });
     if (!found) {
       throw new NotFoundException(`Recipe with ID ${id} not found`);
     }
@@ -56,14 +65,20 @@ export class RecipesService {
     return found;
   }
 
-  deleteRecipe(id: string): void {
-    const found = this.getRecipeById(id);
-    this.recipes = this.recipes.filter((recipe) => recipe.id !== found.id);
+  async deleteRecipe(id: string): Promise<void> {
+    const result = await this.recipeRepository.delete({ id });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Recipe with ID ${id} not found`);
+    }
   }
 
-  updateRecipeCookedStatus(id: string, cooked: boolean): Recipe {
-    const recipe = this.getRecipeById(id);
+  async updateRecipeCookedStatus(id: string, cooked: boolean): Promise<Recipe> {
+    const recipe = await this.getRecipeById(id);
+
     recipe.cooked = cooked;
+    await this.recipeRepository.save(recipe);
+
     return recipe;
   }
 }
