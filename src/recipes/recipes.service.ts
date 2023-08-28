@@ -35,22 +35,28 @@ export class RecipesService {
     return recipe;
   }
 
-  // getRecipesWithFilters(filterDto: GetRecipesFilterDto): Recipe[] {
-  //   const { difficulty, search } = filterDto;
-  //   let recipes = this.findAllRecipes();
-  //   if (difficulty) {
-  //     recipes = recipes.filter((recipe) => recipe.difficulty === difficulty);
-  //   }
-  //   if (search) {
-  //     recipes = recipes.filter(
-  //       (recipe) =>
-  //         recipe.title.includes(search) || recipe.description.includes(search),
-  //     );
-  //   }
-  //   return recipes;
-  // }
+  async getRecipes(filterDto: GetRecipesFilterDto): Promise<Recipe[]> {
+    const { difficulty, search } = filterDto;
 
-  getRecipeById(id: string): Promise<Recipe> {
+    const query = this.recipeRepository.createQueryBuilder('recipe');
+    query.where({ difficulty });
+
+    if (search) {
+      query.andWhere(
+        'recipe.title LIKE :search OR recipe.description LIKE :search',
+        { search: `%${search}%` },
+      );
+    }
+
+    try {
+      const recipes = await query.getMany();
+      return recipes;
+    } catch (error) {
+      throw new NotFoundException('No recipes found');
+    }
+  }
+
+  async getRecipeById(id: string): Promise<Recipe> {
     const found = this.recipeRepository.findOneBy({ id });
     if (!found) {
       throw new NotFoundException(`Recipe with ID ${id} not found`);
@@ -59,14 +65,20 @@ export class RecipesService {
     return found;
   }
 
-  // deleteRecipe(id: string): void {
-  //   const found = this.getRecipeById(id);
-  //   this.recipes = this.recipes.filter((recipe) => recipe.id !== found.id);
-  // }
+  async deleteRecipe(id: string): Promise<void> {
+    const result = await this.recipeRepository.delete({ id });
 
-  // updateRecipeCookedStatus(id: string, cooked: boolean): Recipe {
-  //   const recipe = this.getRecipeById(id);
-  //   recipe.cooked = cooked;
-  //   return recipe;
-  // }
+    if (result.affected === 0) {
+      throw new NotFoundException(`Recipe with ID ${id} not found`);
+    }
+  }
+
+  async updateRecipeCookedStatus(id: string, cooked: boolean): Promise<Recipe> {
+    const recipe = await this.getRecipeById(id);
+
+    recipe.cooked = cooked;
+    await this.recipeRepository.save(recipe);
+
+    return recipe;
+  }
 }

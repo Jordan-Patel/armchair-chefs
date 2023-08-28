@@ -18,14 +18,14 @@ import { Recipe } from './recipe.entity';
 export class RecipesController {
   constructor(private recipesService: RecipesService) {}
 
-  // @Get()
-  // findAllRecipes(@Query() filterDto: GetRecipesFilterDto): Recipe[] {
-  //   if (Object.keys(filterDto).length) {
-  //     return this.recipesService.getRecipesWithFilters(filterDto);
-  //   } else {
-  //     return this.recipesService.findAllRecipes();
-  //   }
-  // }
+  @Get()
+  findAllRecipes(@Query() filterDto: GetRecipesFilterDto): Promise<Recipe[]> {
+    if (Object.keys(filterDto).length) {
+      return this.recipesService.getRecipes(filterDto);
+    } else {
+      return this.recipesService.findAllRecipes();
+    }
+  }
 
   @Get('/:id')
   getRecipeById(@Param('id') id: string): Promise<Recipe> {
@@ -37,16 +37,16 @@ export class RecipesController {
     return this.recipesService.createRecipe(createRecipeDto);
   }
 
-  // @Delete('/:id')
-  // deleteRecipe(@Param('id') id: string): void {
-  //   this.recipesService.deleteRecipe(id);
-  // }
+  @Delete('/:id')
+  deleteRecipe(@Param('id') id: string): Promise<void> {
+    return this.recipesService.deleteRecipe(id);
+  }
 
-  // @Patch('/:id/cooked')
-  // updateRecipeCookedStatus(
-  //   @Param('id') id: string,
-  //   @Body('cooked') cooked: boolean,
-  // ): Recipe {
-  //   return this.recipesService.updateRecipeCookedStatus(id, cooked);
-  // }
+  @Patch('/:id/cooked')
+  updateRecipeCookedStatus(
+    @Param('id') id: string,
+    @Body('cooked') cooked: boolean,
+  ): Promise<Recipe> {
+    return this.recipesService.updateRecipeCookedStatus(id, cooked);
+  }
 }
