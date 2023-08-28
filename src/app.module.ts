@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { RecipesModule } from './recipes/recipes.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get('DB_DATABASE'),
       }),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

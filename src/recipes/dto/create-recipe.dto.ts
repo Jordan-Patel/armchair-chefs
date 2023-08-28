@@ -1,12 +1,12 @@
 import {
-  ArrayMinSize,
-  ArrayNotEmpty,
-  IsArray,
-  IsEnum,
-  IsInt,
+  // ArrayMinSize,
+  // ArrayNotEmpty,
+  // IsArray,
+  // IsEnum,
+  // IsInt,
   IsNotEmpty,
   MaxLength,
-  Min,
+  // Min,
   MinLength,
 } from 'class-validator';
 import { RecipeDifficulty } from '../recipe-difficulty.enum';
