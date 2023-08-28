@@ -9,7 +9,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { RecipeDifficulty } from '../recipe.model';
+import { RecipeDifficulty } from '../recipe-difficulty.enum';
 
 export class CreateRecipeDto {
   @IsNotEmpty()
@@ -22,25 +22,22 @@ export class CreateRecipeDto {
   @MaxLength(300)
   description: string;
 
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
+  // @IsArray()
+  // @ArrayNotEmpty()
+  // @ArrayMinSize(1)
   ingredients: string[];
 
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
+  // @IsArray()
+  // @ArrayNotEmpty()
+  // @ArrayMinSize(1)
   steps: string[];
 
-  @IsInt()
-  @Min(0)
-  @IsNotEmpty()
+  // @IsInt()
+  // @Min(0)
+  // @IsNotEmpty()
   cookingTime: number;
 
   @IsNotEmpty()
-  @IsEnum(RecipeDifficulty)
+  // @IsEnum(RecipeDifficulty)
   difficulty: RecipeDifficulty;
-
-  @IsNotEmpty()
-  isPublished: boolean;
 }

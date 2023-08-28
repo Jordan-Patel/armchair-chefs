@@ -1,42 +1,51 @@
-// import {
-//   Entity,
-//   PrimaryGeneratedColumn,
-//   Column,
-//   // ManyToOne,
-//   // ManyToMany,
-//   // JoinTable,
-// } from 'typeorm';
-// // import { UserEntity } from './user.entity'; // Assuming you have a UserEntity defined
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  // ManyToOne,
+  // ManyToMany,
+  // JoinTable,
+} from 'typeorm';
+// import { UserEntity } from './user.entity'; // Assuming you have a UserEntity defined
 
-// @Entity('recipes')
-// export class Recipe {
-//   @PrimaryGeneratedColumn()
-//   id: number;
+@Entity('recipes')
+export class Recipe {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-//   @Column()
-//   title: string;
+  @Column()
+  title: string;
 
-//   @Column('text')
-//   description: string;
+  @Column('text')
+  description: string;
 
-//   @Column('text', { array: true })
-//   ingredients: string[];
+  @Column('text')
+  ingredients: string[];
 
-//   @Column('text')
-//   instructions: string;
+  @Column('text')
+  steps: string[];
 
-//   @Column({ type: 'int', default: 0 })
-//   cookingTime: number;
+  @Column({ type: 'int', default: 0 })
+  cookingTime: number;
 
-//   @Column({ type: 'boolean', default: false })
-//   isPublished: boolean;
+  @Column({ type: 'int' })
+  difficulty: number;
 
-//   // @ManyToOne(() => UserEntity, (user) => user.recipes)
-//   // author: UserEntity;
+  @Column({ type: 'boolean', default: false })
+  cooked: boolean;
 
-//   // @ManyToMany(() => UserEntity, (user) => user.bookmarkedRecipes)
-//   // @JoinTable()
-//   // bookmarkedBy: UserEntity[];
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-//   // ... other attributes and relationships like tags, categories, ratings, etc.
-// }
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // @ManyToOne(() => UserEntity, (user) => user.recipes)
+  // author: UserEntity;
+
+  // @ManyToMany(() => UserEntity, (user) => user.bookmarkedRecipes)
+  // @JoinTable()
+  // bookmarkedBy: UserEntity[];
+
+  // ... other attributes and relationships like tags, categories, ratings, etc.
+}
