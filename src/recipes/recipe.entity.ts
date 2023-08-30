@@ -1,12 +1,14 @@
+import { Exclude } from 'class-transformer';
+import { User } from '../auth/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
   // ManyToOne,
   // ManyToMany,
   // JoinTable,
 } from 'typeorm';
-// import { UserEntity } from './user.entity'; // Assuming you have a UserEntity defined
 
 @Entity('recipes')
 export class Recipe {
@@ -40,8 +42,9 @@ export class Recipe {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  // @ManyToOne(() => UserEntity, (user) => user.recipes)
-  // author: UserEntity;
+  @ManyToOne(() => User, (user) => user.recipes, { eager: false })
+  @Exclude({ toPlainOnly: true })
+  author: User;
 
   // @ManyToMany(() => UserEntity, (user) => user.bookmarkedRecipes)
   // @JoinTable()

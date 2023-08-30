@@ -7,12 +7,15 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
 import { Recipe } from './recipe.entity';
-// import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../auth/user.entity';
 
 @Controller('recipes')
 export class RecipesController {
@@ -33,13 +36,18 @@ export class RecipesController {
   }
 
   @Post()
-  createRecipe(@Body() createRecipeDto: CreateRecipeDto): Promise<Recipe> {
-    return this.recipesService.createRecipe(createRecipeDto);
+  @UseGuards(AuthGuard())
+  createRecipe(
+    @Body() createRecipeDto: CreateRecipeDto,
+    @GetUser() user: User,
+  ): Promise<Recipe> {
+    return this.recipesService.createRecipe(createRecipeDto, user);
   }
 
   @Delete('/:id')
-  deleteRecipe(@Param('id') id: string): Promise<void> {
-    return this.recipesService.deleteRecipe(id);
+  @UseGuards(AuthGuard())
+  deleteRecipe(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.recipesService.deleteRecipe(id, user);
   }
 
   @Patch('/:id/cooked')
