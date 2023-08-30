@@ -4,17 +4,37 @@ import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Recipe } from './recipe.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/auth/user.entity';
+import { User } from '../auth/user.entity';
 
 @Injectable()
 export class RecipesService {
   constructor(
     @InjectRepository(Recipe)
-    private readonly recipeRepository: Repository<Recipe>,
+    private recipeRepository: Repository<Recipe>,
   ) {}
 
   findAllRecipes(): Promise<Recipe[]> {
     return this.recipeRepository.find();
+  }
+  async getRecipes(filterDto: GetRecipesFilterDto): Promise<Recipe[]> {
+    const { difficulty, search } = filterDto;
+
+    const query = this.recipeRepository.createQueryBuilder('recipe');
+    query.where({ difficulty });
+
+    if (search) {
+      query.andWhere(
+        '(recipe.title LIKE :search OR recipe.description LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    try {
+      const recipes = await query.getMany();
+      return recipes;
+    } catch (error) {
+      throw new NotFoundException('No recipes found');
+    }
   }
 
   async createRecipe(
@@ -40,27 +60,6 @@ export class RecipesService {
     return recipe;
   }
 
-  async getRecipes(filterDto: GetRecipesFilterDto): Promise<Recipe[]> {
-    const { difficulty, search } = filterDto;
-
-    const query = this.recipeRepository.createQueryBuilder('recipe');
-    query.where({ difficulty });
-
-    if (search) {
-      query.andWhere(
-        'recipe.title LIKE :search OR recipe.description LIKE :search',
-        { search: `%${search}%` },
-      );
-    }
-
-    try {
-      const recipes = await query.getMany();
-      return recipes;
-    } catch (error) {
-      throw new NotFoundException('No recipes found');
-    }
-  }
-
   async getRecipeById(id: string): Promise<Recipe> {
     const found = this.recipeRepository.findOneBy({ id });
     if (!found) {
@@ -70,12 +69,16 @@ export class RecipesService {
     return found;
   }
 
-  async deleteRecipe(id: string): Promise<void> {
-    const result = await this.recipeRepository.delete({ id });
+  async deleteRecipe(id: string, user: User): Promise<void> {
+    const recipe = await this.recipeRepository.findOne({
+      where: { id, author: { id: user.id } },
+    });
 
-    if (result.affected === 0) {
+    if (!recipe) {
       throw new NotFoundException(`Recipe with ID ${id} not found`);
     }
+
+    await this.recipeRepository.remove(recipe);
   }
 
   async updateRecipeCookedStatus(id: string, cooked: boolean): Promise<Recipe> {

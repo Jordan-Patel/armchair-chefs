@@ -14,8 +14,8 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
 import { Recipe } from './recipe.entity';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/auth/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../auth/user.entity';
 
 @Controller('recipes')
 export class RecipesController {
@@ -46,8 +46,8 @@ export class RecipesController {
 
   @Delete('/:id')
   @UseGuards(AuthGuard())
-  deleteRecipe(@Param('id') id: string): Promise<void> {
-    return this.recipesService.deleteRecipe(id);
+  deleteRecipe(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.recipesService.deleteRecipe(id, user);
   }
 
   @Patch('/:id/cooked')
