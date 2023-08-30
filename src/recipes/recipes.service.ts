@@ -4,6 +4,7 @@ import { GetRecipesFilterDto } from './dto/get-recipes-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Recipe } from './recipe.entity';
 import { Repository } from 'typeorm';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class RecipesService {
@@ -16,7 +17,10 @@ export class RecipesService {
     return this.recipeRepository.find();
   }
 
-  async createRecipe(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
+  async createRecipe(
+    createRecipeDto: CreateRecipeDto,
+    user: User,
+  ): Promise<Recipe> {
     const { title, description, ingredients, steps, cookingTime, difficulty } =
       createRecipeDto;
     const recipe: Recipe = this.recipeRepository.create({
@@ -29,6 +33,7 @@ export class RecipesService {
       cooked: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      author: user,
     });
 
     await this.recipeRepository.save(recipe);
